@@ -214,11 +214,13 @@ function proceedWithAuthentication(response, user) {
     alternative_contact_number: user.alternative_contact_number,
     permanent_address: user.permanent_address,
     communication_address: user.communication_address,
+    city: user.city,
+    state: user.state,
   };
 
   // Assuming 'token' is the JWT token
   const token = jwt.sign(resToSend, process.env.SECRET_KEY, {
-    expiresIn: "20m",
+    expiresIn: "50m",
   });
 
   const responsePayload = {
@@ -439,6 +441,7 @@ exports.fetchUserData = function (request, response) {
       SELECT
       login.user_id,
       courses_info.course_name,
+      courses_info.status,
       subjects_info.subject_name,
       COUNT(chapters_info.chapter_id) AS total_chapters
       FROM login
