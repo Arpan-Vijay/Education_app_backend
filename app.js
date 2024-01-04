@@ -98,7 +98,8 @@ let userOperations = require("./server/Dao/usersDao.js");
 //app.get("/",(req,res)=>{ res.status(200).send("ok")});
 
 
-app.post("/login", userOperations.adminLogin);
+app.post("/login", userOperations.userLogin);
+app.post("/adminLogin", userOperations.adminLogin);
 
 // app.get(
 //     "/getDashboardsByGroupId/:groupId",

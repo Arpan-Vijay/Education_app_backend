@@ -132,6 +132,63 @@ exports.adminLogin = function (request, response) {
   const connection =
     connectionProvider.mysqlConnectionStringProvider.getMysqlConnection();
 
+  const selectQuery = "SELECT * FROM admin_info WHERE email=?";
+  const selectQueryPayload = [request.body.email];
+
+  console.log("email:", request.body.email);
+  console.log("password:", request.body.password);
+
+  connection.query(
+    selectQuery,
+    selectQueryPayload,
+    function (err, rows, fields) {
+      if (err) {
+        console.log("ERROR", err);
+        response.status(500).send({ error: err });
+        connectionProvider.mysqlConnectionStringProvider.closeMysqlConnection(
+          connection
+        );
+        return;
+      }
+
+      console.log("Rows from the Database:", rows);
+
+      if (rows.length === 1) {
+        const storedPassword = rows[0].password;
+
+        // Check if the entered password matches the stored password
+        if (request.body.password === storedPassword) {
+          // Password matches, proceed with authentication
+          proceedWithAuthentication(response, rows[0]);
+        } else {
+          // Passwords do not match
+          console.log("Invalid password");
+          response.status(401).send("Invalid credentials");
+          connectionProvider.mysqlConnectionStringProvider.closeMysqlConnection(
+            connection
+          );
+        }
+      } else if (rows.length === 0) {
+        console.log("Admin not found");
+        response.status(404).send("Admin not found");
+        connectionProvider.mysqlConnectionStringProvider.closeMysqlConnection(
+          connection
+        );
+      } else {
+        console.log("Unexpected number of rows:", rows.length);
+        response.status(500).send("Internal Server Error");
+        connectionProvider.mysqlConnectionStringProvider.closeMysqlConnection(
+          connection
+        );
+      }
+    }
+  );
+};
+
+exports.userLogin = function (request, response) {
+  const connection =
+    connectionProvider.mysqlConnectionStringProvider.getMysqlConnection();
+
   const selectQuery = "SELECT * FROM login WHERE sap_id=?";
   const selectQueryPayload = [request.body.sap_id];
 
